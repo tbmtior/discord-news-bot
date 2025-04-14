@@ -7,7 +7,7 @@ import os
 import time
 from dotenv import load_dotenv
 
-# 환경 변수 로드
+# 환경 변수 로드 (.env 파일용)
 load_dotenv()
 
 # API 키 로드
@@ -46,7 +46,7 @@ def get_nate_top_articles(limit=5):
             "summary": summary
         })
 
-        time.sleep(1.5)  # GPT API 요청 간격 제한 회피용
+        time.sleep(1.5)  # API 요청 간격 제한
 
     return articles
 
@@ -54,12 +54,24 @@ def fetch_article_body(link):
     try:
         res = requests.get(link, headers={"User-Agent": "Mozilla/5.0"})
         soup = BeautifulSoup(res.text, "html.parser")
-        content_div = soup.select_one("div.articleCont, div.article")
-        if not content_div:
-            return ""
-        paragraphs = content_div.stripped_strings
-        text = " ".join(paragraphs)
-        return text.strip()
+
+        # 다양한 본문 구조 대응
+        selectors = [
+            "div.article",
+            "div#realContents",
+            "div.articleCont",
+            "div.articleNews"
+        ]
+
+        for selector in selectors:
+            content_div = soup.select_one(selector)
+            if content_div:
+                paragraphs = content_div.stripped_strings
+                text = " ".join(paragraphs)
+                if len(text) > 100:
+                    return text.strip()
+
+        return ""
     except Exception as e:
         print(f"❌ 본문 크롤링 실패: {e}")
         return ""
