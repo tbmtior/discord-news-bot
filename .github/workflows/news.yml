@@ -1,8 +1,8 @@
-name: Daily Naver News to Discord
+name: Daily Nate News with GPT
 
 on:
   schedule:
-    - cron: '0 11 * * *'  # 한국시간 20시 == UTC 11시
+    - cron: '0 11 * * *'  # 한국시간 20:00 실행
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run news bot
+      - name: Run news bot (GPT version)
         env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: python news_bot.py
+        run: python news_bot_gpt.py
